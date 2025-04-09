@@ -1,8 +1,6 @@
 
+![BI](https://github.com/user-attachments/assets/d44d947d-3d05-4d76-b807-3b1a4a255e20)
 
-[toc]
-
-## 模板特点
 
 ### 主流框架 & 特性
 
