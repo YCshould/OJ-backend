@@ -1,7 +1,3 @@
-# 数据库初始化
-# @author <a href="https://github.com/liyupi">程序员鱼皮</a>
-# @from <a href="https://yupi.icu">编程导航知识星球</a>
-
 -- 创建库
 create database if not exists yuoj;
 
@@ -65,6 +61,7 @@ create table if not exists post_favour
     index idx_postId (postId),
     index idx_userId (userId)
 ) comment '帖子收藏';
+
 -- 题目表
 create table if not exists question
 (
@@ -85,6 +82,7 @@ create table if not exists question
     isDelete   tinyint  default 0                 not null comment '是否删除',
     index idx_userId (userId)
     ) comment '题目' collate = utf8mb4_unicode_ci;
+
 -- 题目提交表
 create table if not exists question_submit
 (
@@ -101,3 +99,33 @@ create table if not exists question_submit
     index idx_questionId (questionId),
     index idx_userId (userId)
     ) comment '题目提交';
+
+-- 评论表
+create table if not exists comment
+(
+    id           bigint auto_increment comment 'id' primary key,
+    content      text                               not null comment '评论内容',
+    userId       bigint                             not null comment '创建用户 id',
+    questionId   bigint                             not null comment '题目 id',
+    parentId     bigint   default 0                 not null comment '父评论 id（为0则是一级评论）',
+    replyUserId  bigint                             null comment '回复的用户 id',
+    thumbNum     int      default 0                 not null comment '点赞数',
+    createTime   datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime   datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete     tinyint  default 0                 not null comment '是否删除',
+    index idx_userId (userId),
+    index idx_questionId (questionId),
+    index idx_parentId (parentId)
+) comment '题目评论' collate = utf8mb4_unicode_ci;
+
+-- 评论点赞表（硬删除）
+create table if not exists comment_thumb
+(
+    id         bigint auto_increment comment 'id' primary key,
+    commentId  bigint                             not null comment '评论 id',
+    userId     bigint                             not null comment '创建用户 id',
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    index idx_commentId (commentId),
+    index idx_userId (userId)
+) comment '评论点赞';

@@ -1,6 +1,4 @@
 # 公共配置文件
-# @author <a href="https://github.com/liyupi">程序员鱼皮</a>
-# @from <a href="https://yupi.icu">编程导航知识星球</a>
 spring:
   application:
     name: yuoj-backend
@@ -14,7 +12,12 @@ spring:
   # session 配置
   session:
     # todo 取消注释开启分布式 session（须先配置 Redis）
-    # store-type: redis
+    #    store-type: redis
+#    这可能意味着Spring Session尝试使用Redis来跟踪会话的过期时间，
+#    但没有存储完整的会话数据。
+#    这种情况下，系统可能仍然依赖默认的会话存储方式，
+#    如内存中的会话管理，同时使用Redis来处理过期时间，以避免重复登录。
+
     # 30 天过期
     timeout: 2592000
   # 数据库配置
@@ -31,6 +34,11 @@ spring:
     host: localhost
     port: 6379
     timeout: 5000
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
   # Elasticsearch 配置
   # todo 需替换配置，然后取消注释
 #  elasticsearch:
@@ -100,3 +108,7 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.yupi.yuoj.controller
+
+# 代码沙箱配置
+codesandbox:
+  type: remote

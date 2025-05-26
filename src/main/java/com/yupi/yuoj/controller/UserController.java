@@ -45,8 +45,7 @@ import static com.yupi.yuoj.service.impl.UserServiceImpl.SALT;
 /**
  * 用户接口
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ *
  */
 @RestController
 @RequestMapping("/user")
@@ -288,6 +287,7 @@ public class UserController {
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<User> userPage = userService.page(new Page<>(current, size),
                 userService.getQueryWrapper(userQueryRequest));
+        //开始的时候userVOPage是没有数据的
         Page<UserVO> userVOPage = new Page<>(current, size, userPage.getTotal());
         List<UserVO> userVO = userService.getUserVO(userPage.getRecords());
         userVOPage.setRecords(userVO);

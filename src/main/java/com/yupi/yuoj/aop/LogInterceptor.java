@@ -13,17 +13,12 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-/**
- * 请求响应日志 AOP
- *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
- **/
+
 @Aspect
 @Component
 @Slf4j
 public class LogInterceptor {
-
+    //第一次递交，项目初始化，题目模块，用户模块基础的增删改查
     /**
      * 执行拦截
      */

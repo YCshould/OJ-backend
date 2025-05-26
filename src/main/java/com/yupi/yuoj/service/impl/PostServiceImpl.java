@@ -49,8 +49,7 @@ import org.springframework.stereotype.Service;
 /**
  * 帖子服务实现
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ *
  */
 @Service
 @Slf4j
@@ -265,7 +264,9 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
             return postVOPage;
         }
         // 1. 关联查询用户信息
+        // 因为 postList 里的 userId 可能重复，所以需要先去重
         Set<Long> userIdSet = postList.stream().map(Post::getUserId).collect(Collectors.toSet());
+        //无论键是否唯一，分组后的 Map 结构始终是 Key → List<Value>。这是 groupingBy 的标准行为。
         Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 2. 已登录，获取用户点赞、收藏状态
