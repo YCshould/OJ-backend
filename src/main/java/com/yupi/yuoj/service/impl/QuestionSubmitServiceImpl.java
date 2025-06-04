@@ -16,6 +16,8 @@ import com.yupi.yuoj.model.entity.User;
 import com.yupi.yuoj.model.enums.QuestionSubmitLanguageEnum;
 import com.yupi.yuoj.model.enums.QuestionSubmitStatusEnum;
 import com.yupi.yuoj.model.vo.QuestionSubmitVO;
+import com.yupi.yuoj.model.vo.QuestionVO;
+import com.yupi.yuoj.model.vo.UserVO;
 import com.yupi.yuoj.rabbitmq.MyMessageProducer;
 import com.yupi.yuoj.service.QuestionService;
 import com.yupi.yuoj.service.QuestionSubmitService;
@@ -90,6 +92,17 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if(!save){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"数据输入失败");
         }
+        // 更新题目提交数（使用原子操作）
+        Question updateQuestion = new Question();
+        updateQuestion.setId(questionId);
+        boolean updateResult = questionService.update()
+                .setSql("submitNum = submitNum + 1")
+                .eq("id", questionId)
+                .update();
+        if (!updateResult) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目提交数更新失败");
+        }
+
         ///利用消息队列进行异步判题
         ///目前用的是普通的子线程异步处理
 //        long questionSubmitId = questionSubmit.getId();
@@ -132,12 +145,30 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Override
     public QuestionSubmitVO getQuestionSubmitVO(QuestionSubmit questionSubmit, User loginUser) {
         QuestionSubmitVO questionSubmitVO = QuestionSubmitVO.objToVo(questionSubmit);
-        //仅本人和管理员能看见自己的答案
-        Long userId = loginUser.getId();
-        //处理脱敏
-        if(!Objects.equals(userId, questionSubmit.getUserId()) &&!userService.isAdmin(loginUser)){
+        
+        // 1. 关联查询用户信息
+        Long userId = questionSubmit.getUserId();
+        User user = null;
+        if (userId != null && userId > 0) {
+            user = userService.getById(userId);
+        }
+        UserVO userVO = userService.getUserVO(user);
+        questionSubmitVO.setUserVO(userVO);
+        
+        // 2. 关联查询题目信息
+        Long questionId = questionSubmit.getQuestionId();
+        Question question = null;
+        if (questionId != null && questionId > 0) {
+            question = questionService.getById(questionId);
+        }
+        QuestionVO questionVO = questionService.getQuestionVO(question, null);
+        questionSubmitVO.setQuestionVO(questionVO);
+        
+        //3. 脱敏：仅本人和管理员能看见自己的答案
+        if(!Objects.equals(loginUser.getId(), questionSubmit.getUserId()) && !userService.isAdmin(loginUser)){
             questionSubmitVO.setCode(null);
         }
+        
         return questionSubmitVO;
     }
 

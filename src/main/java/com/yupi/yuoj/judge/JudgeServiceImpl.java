@@ -102,6 +102,7 @@ public class JudgeServiceImpl implements JudgeService {
         //策略模式更趋向于调用不同的方法，工厂模式更趋向于创建不同对象
         //调用判题策略
         //就这一部分是不同的，根据不同情况使用不同的判题逻辑
+        //TODO 还需显示在前端
         JudgeInfo judgeInfoAfter = judgeManager.doJudge(judgeContext);
         //这部分代码是用工厂模式来创建DefaultJudgeStrategyService对象,在调用他的doJudge方法来进行判题
         //也就是说用工厂模式也可以实现上面策略模式的功能
@@ -113,10 +114,27 @@ public class JudgeServiceImpl implements JudgeService {
         QuestionSubmit newQuestionSubmit1 = new QuestionSubmit();
         newQuestionSubmit1.setId(questionSubmitId);
         newQuestionSubmit1.setStatus(QuestionSubmitStatusEnum.SUCCESS.getValue());
-        newQuestionSubmit1.setJudgeInfo(JSONUtil.toJsonStr(judgeInfo));
+        newQuestionSubmit1.setJudgeInfo(JSONUtil.toJsonStr(judgeInfoAfter));
         update = questionSubmitService.updateById(newQuestionSubmit1);
         if (!update) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新题目提交状态失败");
+        }
+        //增加题目正确次数
+        QuestionSubmit questionSubmitServiceById = questionSubmitService.getById(questionSubmitId);
+        String judgeInfo1 = questionSubmitServiceById.getJudgeInfo();
+        //判断题目是否通过
+        if(judgeInfo1.contains("Accepted")){
+            //通过就将通过次数加1
+            // 更新题目提交数（使用原子操作）
+            Question updateQuestion = new Question();
+            updateQuestion.setId(questionId);
+            boolean updateResult = questionService.update()
+                    .setSql("acceptedNum = acceptedNum + 1")
+                    .eq("id", questionId)
+                    .update();
+            if (!updateResult) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目提交数更新失败");
+            }
         }
         return questionSubmitService.getById(questionSubmitId);
     }

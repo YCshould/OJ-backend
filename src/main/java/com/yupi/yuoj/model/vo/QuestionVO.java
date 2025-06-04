@@ -11,11 +11,12 @@ import com.yupi.yuoj.model.entity.Question;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 @Data
-public class QuestionVO {
+public class QuestionVO implements Serializable {
     /**
      * id
      */
@@ -81,6 +82,7 @@ public class QuestionVO {
      * 创建人
      */
     private UserVO userVO;
+
     private static final long serialVersionUID = 1L;
     /**
      * 包装类转对象
